@@ -1,0 +1,28 @@
+services:
+  vps:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: therealanonymousrsa-vps:latest
+    container_name: therealanonymousrsa-vps
+    restart: unless-stopped
+    ports:
+      - "${PORT:-7681}:${PORT:-7681}"
+    environment:
+      PORT: "${PORT:-7681}"
+      USERNAME: "${USERNAME:-admin}"
+      PASSWORD: "${PASSWORD:-}"
+      TZ: "${TZ:-UTC}"
+      SUDO_NOPASSWD: "${SUDO_NOPASSWD:-true}"
+      ENABLE_SSL: "${ENABLE_SSL:-false}"
+    volumes:
+      - vps-home:/home/${USERNAME:-admin}
+    healthcheck:
+      test: ["CMD", "/healthcheck.sh"]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+
+volumes:
+  vps-home:
