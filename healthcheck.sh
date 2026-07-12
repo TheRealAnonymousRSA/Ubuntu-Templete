@@ -13,7 +13,7 @@
 
 set -uo pipefail
 
-: "${PORT:=7681}"
+: "${PORT:=8080}"
 : "${ENABLE_SSL:=false}"
 
 if [ "${ENABLE_SSL}" = "true" ]; then

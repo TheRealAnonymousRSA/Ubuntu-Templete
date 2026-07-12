@@ -6,7 +6,8 @@
 # explicitly so it works the same whether invoked by root or by the
 # sudo-capable login user.
 
-set -euo pipefail
+set -Eeuo pipefail
+trap 'echo "Error on line $LINENO" >&2' ERR
 
 echo "Updating package lists..."
 sudo apt-get update

@@ -7,9 +7,10 @@
 # argument list and execs it directly, so ttyd becomes tini's child process
 # with no wrapper shell left running underneath it.
 
-set -euo pipefail
+set -Eeuo pipefail
+trap 'echo "Error on line $LINENO" >&2' ERR
 
-: "${PORT:=7681}"
+: "${PORT:=8080}"
 : "${USERNAME:=admin}"
 : "${PASSWORD:?PASSWORD must be set before start.sh runs (entrypoint.sh sets this)}"
 : "${ENABLE_SSL:=false}"

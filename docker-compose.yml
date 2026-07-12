@@ -7,9 +7,9 @@ services:
     container_name: therealanonymousrsa-vps
     restart: unless-stopped
     ports:
-      - "${PORT:-7681}:${PORT:-7681}"
+      - "${PORT:-8080}:${PORT:-8080}"
     environment:
-      PORT: "${PORT:-7681}"
+      PORT: "${PORT:-8080}"
       USERNAME: "${USERNAME:-admin}"
       PASSWORD: "${PASSWORD:-}"
       TZ: "${TZ:-UTC}"

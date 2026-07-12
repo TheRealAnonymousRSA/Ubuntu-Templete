@@ -5,7 +5,8 @@
 # Idempotently ensures the given Linux user exists, has the given password,
 # is a member of the sudo group, and has a validated sudoers.d entry.
 
-set -euo pipefail
+set -Eeuo pipefail
+trap 'echo "Error on line $LINENO" >&2' ERR
 
 if [ "$#" -lt 2 ]; then
     echo "Usage: user-setup.sh <username> <password> [sudo_nopasswd:true|false]" >&2

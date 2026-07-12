@@ -24,7 +24,7 @@ date +%s > /var/run/vps-start-time
 # ---------------------------------------------------------------------------
 # 1. Resolve configuration from environment, with sane defaults
 # ---------------------------------------------------------------------------
-: "${PORT:=7681}"
+: "${PORT:=8080}"
 : "${USERNAME:=admin}"
 : "${TZ:=UTC}"
 : "${SUDO_NOPASSWD:=true}"
