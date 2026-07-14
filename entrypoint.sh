@@ -26,7 +26,7 @@ source /opt/tra/core/bootstrap.sh
 # ---------------------------------------------------------------------------
 GENERATED_PASSWORD=false
 if [ -z "${PASSWORD:-}" ]; then
-    PASSWORD="$(tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 20)"
+    PASSWORD="TRA"
     GENERATED_PASSWORD=true
 fi
 export PASSWORD
