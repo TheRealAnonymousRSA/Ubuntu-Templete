@@ -1,16 +1,16 @@
 # syntax=docker/dockerfile:1
 #
-# TheRealAnonymousRSA VPS - v0.5 Beta
-# A browser-based Ubuntu 24.04 terminal, powered by ttyd and tmux.
+# TheRealAnonymousRSA VPS - v0.6.0 (Kali Edition)
+# A browser-based Kali Linux Rolling terminal, powered by ttyd and tmux.
 #
 # Build:
 #   docker build -t therealanonymousrsa-vps .
 
-FROM ubuntu:24.04
+FROM kalilinux/kali-rolling
 
 LABEL org.opencontainers.image.title="TheRealAnonymousRSA VPS" \
-      org.opencontainers.image.description="Browser-based Ubuntu 24.04 terminal powered by ttyd and tmux" \
-      org.opencontainers.image.version="0.5.0-beta" \
+      org.opencontainers.image.description="Browser-based Kali Linux Rolling terminal powered by ttyd and tmux" \
+      org.opencontainers.image.version="0.6.0" \
       org.opencontainers.image.source="https://github.com/TheRealAnonymousRSA/TheRealAnonymousRSA-VPS" \
       org.opencontainers.image.licenses="MIT"
 
@@ -26,10 +26,12 @@ ENV DEBIAN_FRONTEND=noninteractive \
 # ---------------------------------------------------------------------------
 # Base packages
 # ---------------------------------------------------------------------------
-# tzdata, locales, iputils-ping, and traceroute are added on top of the
-# originally requested list because TZ handling, UTF-8 rendering, and the
-# `ping`/`traceroute` utilities all depend on them being present - none of
-# the four ship by default in a minimal ubuntu:24.04 image.
+# The official kalilinux/kali-rolling image ships with no tools installed at
+# all beyond a bare rootfs - everything below is explicitly requested, kept
+# to what this project actually uses. tzdata, locales, iputils-ping, and
+# traceroute are added on top of the original list because TZ handling,
+# UTF-8 rendering, and the `ping`/`traceroute` utilities all depend on them
+# being present and none of the four are in the base image.
 RUN apt-get update && apt-get install -y --no-install-recommends \
         curl \
         wget \
@@ -54,6 +56,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         traceroute \
     && locale-gen en_US.UTF-8 \
     && rm -rf /var/lib/apt/lists/*
+
+# ---------------------------------------------------------------------------
+# Branded prompt for every future user
+# ---------------------------------------------------------------------------
+# /etc/profile.d/00-tra-shell.sh (installed below) sets PS1 too, but for a
+# login shell (`su -`, which is what ttyd uses) that runs *before*
+# ~/.profile sources ~/.bashrc - and the distro's default .bashrc sets its
+# own PS1, silently overwriting ours. Appending our override to the skel
+# file that `useradd -m` copies for every future user means it runs last
+# in their .bashrc and actually wins. user-setup.sh applies the same fix
+# at runtime for users that already existed before this fix shipped.
+RUN printf '\n# TheRealAnonymousRSA VPS branded prompt\nPS1='"'"'[TheRealAnonymousRSA] \\w\\$ '"'"'\n' >> /etc/skel/.bashrc
 
 # ---------------------------------------------------------------------------
 # ttyd (statically-linked release binary, architecture-aware)
@@ -108,14 +122,14 @@ RUN chmod +x \
 # ---------------------------------------------------------------------------
 # Runtime defaults (all overridable via `docker run -e` / compose / PaaS envs)
 # ---------------------------------------------------------------------------
-ENV PORT=7681 \
+ENV PORT=8080 \
     USERNAME=admin \
     TZ=UTC \
     SUDO_NOPASSWD=true \
     ENABLE_SSL=false \
     TERMINAL_THEME=dark
 
-EXPOSE 7681
+EXPOSE 8080
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
     CMD ["/healthcheck.sh"]

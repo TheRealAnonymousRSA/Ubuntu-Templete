@@ -31,6 +31,33 @@ else
     log_info "User '${username}' already exists, updating credentials"
 fi
 
+# If /home/<username> is provided by a mounted volume (e.g. the docker-compose
+# `vps-home` volume), Docker creates it as an empty root-owned directory
+# *before* the entrypoint ever runs. `useradd -m` does NOT take ownership of
+# a home directory that already exists - it just warns and moves on - so
+# without this, the user would log in to a home directory they can't
+# actually write to. Safe to run unconditionally and idempotently on every
+# start, whether or not a volume is involved.
+home_dir="$(getent passwd "${username}" | cut -d: -f6)"
+if [ -n "${home_dir}" ] && [ -d "${home_dir}" ]; then
+    chown -R "${username}:${username}" "${home_dir}"
+fi
+
+# The Dockerfile appends a branded PS1 to /etc/skel/.bashrc so any *newly*
+# created user gets it automatically. A user created by an older image
+# (upgrading in place, same volume) already has a .bashrc copied before
+# that fix existed, so ensure it's there too - guarded by a marker comment
+# so re-running this on every container start doesn't keep appending it.
+bashrc_file="${home_dir}/.bashrc"
+if [ -n "${home_dir}" ] && [ -f "${bashrc_file}" ] && ! grep -q 'TheRealAnonymousRSA VPS branded prompt' "${bashrc_file}"; then
+    {
+        echo ""
+        echo "# TheRealAnonymousRSA VPS branded prompt"
+        echo 'PS1='"'"'[TheRealAnonymousRSA] \w\$ '"'"''
+    } >> "${bashrc_file}"
+    chown "${username}:${username}" "${bashrc_file}"
+fi
+
 echo "${username}:${password}" | chpasswd
 
 usermod -aG sudo "${username}"

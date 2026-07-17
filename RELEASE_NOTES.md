@@ -1,57 +1,62 @@
-# Release Notes - v0.5 Beta
+# Release Notes - v0.6.0 "Kali Edition"
 
-**TheRealAnonymousRSA VPS v0.5 Beta** is a from-the-ground-up refactor of
-the original ttyd browser terminal, aimed at making it feel like a
-genuine small platform rather than a single Dockerfile: a modular
-codebase, real session persistence, structured logging, and a proper
-command set.
+**TheRealAnonymousRSA VPS v0.6.0** moves the base image from Ubuntu
+24.04 to Kali Linux Rolling, and tightens up the project's own visual
+identity - a branded prompt, a friendly hostname display, a cleaner
+system snapshot - while keeping everything from v0.5 that already
+worked: the modular architecture, `tini` + `tmux`, structured logging,
+startup validation, terminal themes, and the full `tra-*` command set.
+
+This is a base-image swap and a branding pass, not a rewrite.
 
 ## Highlights
 
-**Your session survives a dropped connection.** Every terminal
-connection now runs inside a `tmux` session named `main`. Refresh the
-tab, lose Wi-Fi for a minute, or open a second tab - you land back in
-the same shell, with the same working directory and running processes,
-not a fresh one.
+**Kali Linux Rolling under the hood.** Same architecture, same
+commands, same tmux-backed session persistence - now with `apt`
+pointed at Kali's rolling repository instead of Ubuntu's, giving you
+one-command access to Kali's full tool ecosystem if and when you want
+it. The base image itself installs nothing beyond what's listed in the
+Dockerfile; nothing extra is pulled in automatically.
 
-**A real command set.** `tra-status`, `tra-network`, `tra-storage`,
-`tra-ip`, `tra-speedtest`, `tra-logs`, and friends replace the smaller
-v0.1 command list, all under one consistent `tra-` prefix so nothing
-collides with standard Linux tools.
+**A shell that feels like its own thing.** The login prompt now reads
+`[TheRealAnonymousRSA] ~$` instead of `user@host:~$`, and the system
+snapshot shows a fixed, friendly hostname instead of Docker's randomly
+generated one. Purely cosmetic - `hostname` and `tra-about` still tell
+you directly that this is a container if you ask.
 
-**One-command installs.** `tra-install node`, `tra-install python`,
-`tra-install docker`, and similar shortcuts cover the tools people reach
-for most; anything else falls through to `apt-get install` directly.
+**New default port: 8080.** `PORT` still defaults sensibly and is still
+fully overridable; the number just changed from `7681`.
 
-**Four terminal themes.** Set `TERMINAL_THEME` to `dark` (default),
-`light`, `solarized`, or `dracula`.
+## What did *not* change, on request
 
-**Startup you can trust.** `tini` runs as PID 1 for correct signal
-handling and zombie reaping. A dependency-verification pass and
-environment-variable validation run before anything else starts, with
-clear warnings and safe fallbacks instead of confusing failures three
-steps later.
+Two things in the spec for this release were declined, and remain
+declined regardless of anything else in this changelog:
 
-**Everything logs somewhere.** Structured, timestamped log lines go to
-both `docker logs` and a persistent `/var/log/tra/system.log`, readable
-any time via `tra-logs`.
+- **No hardcoded credentials.** `PASSWORD` is still an environment
+  variable you set yourself, with the random-generation fallback intact
+  when you don't set one. There is no baked-in shared username/password.
+- **No concealment of the container itself.** The branding above is
+  cosmetic dressing, not an attempt to make the underlying reality
+  undetectable to whoever is logged in.
 
-## Upgrading from v0.1
+## Upgrading from v0.5
 
-- `start.sh` and `entrypoint.sh` remain at the same repository paths, so
-  existing `docker-compose.yml` / Dockerfile references keep working.
-- New environment variable: `TERMINAL_THEME` (optional, defaults to
-  `dark`).
-- The `install` command from v0.1 is gone; use `tra-install` instead.
-- If you had a named volume mounted at `/home/<username>`, it continues
-  to work unchanged.
+- Every `tra-*` command, the `tmux`/`ttyd`/`tini` architecture, and the
+  `src/` module layout are unchanged - this upgrade only touches the
+  base image and the branding/display layer.
+- Default `PORT` changed from `7681` to `8080`. If you pinned `7681`
+  explicitly via the `PORT` environment variable, nothing changes for
+  you; if you relied on the default, update your port mapping.
+- Two fixes from the v0.5 patch cycle are included here: home directory
+  ownership on volume-mounted setups, and environment-variable
+  whitespace trimming (see `CHANGELOG.md` for details).
 
-## Known limitations in this beta
+## Known limitations
 
-- `tra-speedtest` is a lightweight approximation (a single-file download
-  timing test against a public CDN), not a rigorous measurement.
-- Typing into a terminal from a mobile on-screen keyboard is inherently
-  more cumbersome than a physical keyboard - this is a general limitation
-  of browser terminals, not something this release changes.
+- Kali's rolling repository moves faster than Ubuntu's LTS repos;
+  package versions inside the container will drift over time the same
+  way they would on any Kali installation. Run `tra-update` periodically.
+- `tra-speedtest` remains a lightweight approximation, not a rigorous
+  measurement.
 - Multi-user accounts, the file manager, and the admin panel are not yet
   implemented - see `ROADMAP.md`.

@@ -11,6 +11,11 @@
 # there is no risk of shadowing a coreutils binary - every tra-* command
 # is a plain script on PATH (see src/commands/).
 
+# Branded prompt instead of the default user@hostname style. \w keeps the
+# current directory visible (e.g. "~" at home, "~/project" elsewhere),
+# which is genuinely useful and not something we're trying to hide.
+PS1='[TheRealAnonymousRSA] \w\$ '
+
 case "$-" in
     *i*)
         /opt/tra/branding/banner.sh

@@ -1,8 +1,8 @@
 # TheRealAnonymousRSA VPS
 
-**v0.5 Beta**
+**v0.6.0 - Kali Edition**
 
-A self-hosted, browser-based Ubuntu 24.04 terminal, built on
+A self-hosted, browser-based Kali Linux Rolling terminal, built on
 [ttyd](https://github.com/tsl0922/ttyd), `tmux`, `tini`, and Docker. Open
 a tab, log in, get a real writable Bash shell with `sudo` and a session
 that survives a dropped connection.
@@ -39,8 +39,16 @@ that survives a dropped connection.
 
 ## A note on where to run this
 
-This gives whoever logs in a full, `sudo`-capable Ubuntu shell over the
-browser. That's the point - but it also means it's general-purpose
+This gives whoever logs in a full, `sudo`-capable Kali Linux shell over
+the browser - which also means one-command `apt` access to Kali's full
+package repository, including its penetration-testing and security
+tooling. That's normal and expected for anyone using this for their own
+security learning, CTF practice, or authorized testing work. If you're
+handing access to this out to other people, treat it the way you'd treat
+handing out root on any box with that toolset available: know who has
+the credentials and why.
+
+That's the point of the shell - but it also means it's general-purpose
 compute, not a typical stateless web request/response app.
 
 If you're looking at Railway, Render, or Northflank specifically because
@@ -83,14 +91,14 @@ docker build -t therealanonymousrsa-vps .
 
 docker run -d \
   --name vps \
-  -p 7681:7681 \
+  -p 8080:8080 \
   -e USERNAME=admin \
   -e PASSWORD=change-me-please \
   -e TZ=UTC \
   therealanonymousrsa-vps
 ```
 
-Open `http://localhost:7681`, log in with the username/password above,
+Open `http://localhost:8080`, log in with the username/password above,
 and you're in.
 
 If you skip `-e PASSWORD=...`, one is generated for you - check the logs
@@ -110,7 +118,7 @@ docker compose logs -f
 ```
 
 `docker-compose.yml` maps `${PORT}` on the host to `${PORT}` in the
-container (both default to `7681`), and keeps `/home/${USERNAME}` in a
+container (both default to `8080`), and keeps `/home/${USERNAME}` in a
 named volume (`vps-home`) so your files survive a `docker compose down
 && up`.
 
@@ -119,7 +127,7 @@ named volume (`vps-home`) so your files survive a `docker compose down
 This is the setup this project is really built for.
 
 ```bash
-# on a fresh Ubuntu VPS, with Docker + the Compose plugin installed
+# on a fresh Linux VPS, with Docker + the Compose plugin installed
 git clone https://github.com/TheRealAnonymousRSA/TheRealAnonymousRSA-VPS.git
 cd TheRealAnonymousRSA-VPS
 cp config/.env.example .env
@@ -158,7 +166,7 @@ on - pricing tiers and what's allowed on them change often.
 
 | Variable        | Default  | Description                                                                 |
 |-----------------|----------|-------------------------------------------------------------------------------|
-| `PORT`          | `7681`   | Port ttyd listens on. Most PaaS platforms inject this automatically.         |
+| `PORT`          | `8080`   | Port ttyd listens on. Most PaaS platforms inject this automatically.         |
 | `USERNAME`      | `admin`  | Login username (ttyd Basic Auth) and the Linux user you land in.             |
 | `PASSWORD`      | *(generated)* | Login password. If unset, a random 20-character password is generated and printed once in the logs. |
 | `TZ`            | `UTC`    | IANA timezone name, e.g. `Africa/Johannesburg`, `Europe/London`.             |

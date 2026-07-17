@@ -23,7 +23,7 @@ set -uo pipefail
 # manually (via `tra-health` / `tra-status`), `su -` has reset the
 # environment, so fall back to the TRA_-prefixed copies entrypoint.sh
 # persisted into /etc/environment specifically so this still works there.
-: "${PORT:=${TRA_PORT:-7681}}"
+: "${PORT:=${TRA_PORT:-8080}}"
 : "${ENABLE_SSL:=${TRA_ENABLE_SSL:-false}}"
 
 if [ "${ENABLE_SSL}" = "true" ]; then

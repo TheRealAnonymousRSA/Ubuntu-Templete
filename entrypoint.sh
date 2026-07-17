@@ -26,7 +26,7 @@ source /opt/tra/core/bootstrap.sh
 # ---------------------------------------------------------------------------
 GENERATED_PASSWORD=false
 if [ -z "${PASSWORD:-}" ]; then
-    PASSWORD="TRA"
+    PASSWORD="$(tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 20)"
     GENERATED_PASSWORD=true
 fi
 export PASSWORD
@@ -49,7 +49,7 @@ echo "${TZ}" > /etc/timezone
 # environment as real logins do, so PORT/ENABLE_SSL as set on the container
 # are NOT visible inside a logged-in terminal session. Without this, running
 # `tra-health` (or `tra-status`, which calls it) from inside the terminal
-# would silently check the wrong port whenever PORT is not the default 7681.
+# would silently check the wrong port whenever PORT is not the default 8080.
 # /etc/environment is read by PAM for every login shell, `su -` included, so
 # writing TRA_-prefixed copies here makes them survive that reset.
 # Idempotent: strip any previous TRA_PORT/TRA_ENABLE_SSL lines before adding

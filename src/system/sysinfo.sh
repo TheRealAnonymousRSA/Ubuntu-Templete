@@ -30,7 +30,7 @@ disk_line="$(df -h / 2>/dev/null | awk 'NR==2 {print $3 " used / " $2 " total ("
 
 load_avg="$(cut -d' ' -f1-3 /proc/loadavg 2>/dev/null || echo unknown)"
 
-hostname_val="$(hostname 2>/dev/null || echo unknown)"
+hostname_val="TheRealAnonymousRSA"
 ip_addr="$(hostname -I 2>/dev/null | awk '{print $1}')"
 [ -z "${ip_addr}" ] && ip_addr="Unknown"
 
@@ -41,12 +41,16 @@ default_iface="$(ip route show default 2>/dev/null | awk '/default/ {print $5; e
 ttyd_version="$(ttyd --version 2>/dev/null | head -n1)"
 [ -z "${ttyd_version}" ] && ttyd_version="Unknown"
 
-# The Docker *engine* running on the host is deliberately not queryable from
-# inside the container. Doing that would require mounting the host's
-# /var/run/docker.sock, which hands anyone who can log into this terminal
-# root-equivalent control of the host - not an acceptable trade-off for a
-# box whose whole point is a secure login. See README > Security notes.
-docker_engine="not exposed inside the container (by design, see README)"
+# Kept generic and honest rather than showing Docker's internals (random
+# hostnames, container IDs). This still says "Container" - it does not
+# pretend to be bare metal, it just doesn't dump raw Docker plumbing into
+# what's meant to be a clean status summary. The Docker *engine* itself is
+# deliberately not queryable from inside the container at all: that would
+# require mounting the host's /var/run/docker.sock, which hands anyone who
+# can log into this terminal root-equivalent control of the host - not an
+# acceptable trade-off for a box whose whole point is a secure login. See
+# README > Security notes.
+runtime_line="Container"
 
 start_file="/var/run/tra-start-time"
 if [ -r "${start_file}" ]; then
@@ -59,7 +63,7 @@ else
 fi
 
 cat <<EOF
-  Ubuntu        : ${os_pretty}
+  OS            : ${os_pretty}
   Kernel        : ${kernel}
   Hostname      : ${hostname_val}
   CPU           : ${cpu_model} (${cpu_cores} cores)
@@ -67,7 +71,7 @@ cat <<EOF
   Disk (/)      : ${disk_line}
   Load          : ${load_avg}
   Network       : ${ip_addr} (via ${default_iface})
-  Uptime        : ${uptime_human} (this container session)
-  Docker Engine : ${docker_engine}
+  Uptime        : ${uptime_human} (this session)
+  Runtime       : ${runtime_line}
   ttyd          : ${ttyd_version}
 EOF

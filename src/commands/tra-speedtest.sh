@@ -23,7 +23,7 @@ echo
 success=false
 for url in "${TEST_URLS[@]}"; do
     echo "Testing against: ${url}"
-    result="$(curl -o /dev/null -s --max-time 20 \
+    result="$(curl -o /dev/null -s -L --max-time 20 \
         -w 'speed_bps=%{speed_download}\nhttp_code=%{http_code}\n' \
         "${url}" 2>/dev/null)"
 
